@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/plugins/tblLabel_TH" >
+        <file>icon.png</file>
+        <file>icons/LetterA.svg</file>
+        <file>icons/LetterA.png</file>
+    </qresource>
+</RCC>
