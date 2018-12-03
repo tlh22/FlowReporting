@@ -552,7 +552,6 @@ class tblLabel_TH:
 
         idxtimePeriods = 3
 
-
         # TODO: set up headers
         # now write the table details
 
@@ -568,13 +567,18 @@ class tblLabel_TH:
         currRow = 0
         for row in timePeriods:
 
+            #rowString = NULL
+            rowValues = False
+
             timeString = str(timePeriods[currRow][self.timePeriodTextIndex])
 
             QgsMessageLog.logMessage("In buildHTMLFile: currTimePeriod " + str(timeString),
                                      tag="TOMs panel")
 
-            htmlFile.write('  <tr>\n'.format())
-            htmlFile.write('    <th class="normal">{timePeriod}</th>\n'.format(timePeriod=timeString))
+            rowString = ('  <tr>\n'.format())
+            rowString = rowString + ('    <th class="normal">{timePeriod}</th>\n'.format(timePeriod=timeString))
+            #htmlFile.write('  <tr>\n'.format())
+            #htmlFile.write('    <th class="normal">{timePeriod}</th>\n'.format(timePeriod=timeString))
 
             for dayDetails in sorted(outputDetails, key=lambda f: f[1]):
 
@@ -583,17 +587,26 @@ class tblLabel_TH:
 
                 #for typeOutput in dayDetails:
 
-                """QgsMessageLog.logMessage("In buildHTMLFile: currTimePeriod " + str(currTimePeriod),
-                                         tag="TOMs panel")"""
                 #currTimePeriods = typeOutput[idxtimePeriods]
-                value = str(currTimePeriods[currRow][self.valueIndex])
+                value = currTimePeriods[currRow][self.valueIndex]
+                if value <> None:
+                    value = str(currTimePeriods[currRow][self.valueIndex])
+                    rowValues = True
+
+                QgsMessageLog.logMessage("In buildHTMLFile: value " + str(value),
+                                         tag="TOMs panel")
+
                 rowType = "normal"
                 if currRow == highestValueRow:
                     rowType = "highlightHighestData"
 
-                htmlFile.write('    <td class="{rowTypePlace}">{rowValue}</td>\n'.format(rowTypePlace=rowType, rowValue=value))
+                rowString = rowString + ('    <td class="{rowTypePlace}">{rowValue}</td>\n'.format(rowTypePlace=rowType, rowValue=value))
+                #htmlFile.write('    <td class="{rowTypePlace}">{rowValue}</td>\n'.format(rowTypePlace=rowType, rowValue=value))
 
-            htmlFile.write('  </tr>\n'.format())
+            rowString = rowString + ('  </tr>\n'.format())
+            #htmlFile.write('  </tr>\n'.format())
+            if rowValues == True:
+                htmlFile.write(rowString)
 
             currRow = currRow + 1
 
@@ -701,18 +714,30 @@ class tblLabel_TH:
         # Grab the results from the layer
         features = VALUES.getFeatures(request)
 
-        timePeriods = [[7, "07:00-08:00", 0],
-                       [8, "08:00-09:00", 0],
-                       [9, "09:00-10:00", 0],
-                       [10, "10:00-11:00", 0],
-                       [11, "11:00-12:00", 0],
-                       [12, "12:00-13:00", 0],
-                       [13, "13:00-14:00", 0],
-                       [14, "14:00-15:00", 0],
-                       [15, "15:00-16:00", 0],
-                       [16, "16:00-17:00", 0],
-                       [17, "17:00-18:00", 0],
-                       [18, "18:00-19:00", 0]]
+        timePeriods = [[0, "00:00-01:00", None],
+                       [1, "01:00-02:00", None],
+                       [2, "02:00-03:00", None],
+                       [3, "03:00-04:00", None],
+                       [4, "04:00-05:00", None],
+                       [5, "05:00-06:00", None],
+                       [6, "06:00-07:00", None],
+                       [7, "07:00-08:00", None],
+                       [8, "08:00-09:00", None],
+                       [9, "09:00-10:00", None],
+                       [10, "10:00-11:00", None],
+                       [11, "11:00-12:00", None],
+                       [12, "12:00-13:00", None],
+                       [13, "13:00-14:00", None],
+                       [14, "14:00-15:00", None],
+                       [15, "15:00-16:00", None],
+                       [16, "16:00-17:00", None],
+                       [17, "17:00-18:00", None],
+                       [18, "18:00-19:00", None],
+                       [19, "19:00-20:00", None],
+                       [20, "20:00-21:00", None],
+                       [21, "21:00-22:00", None],
+                       [22, "22:00-23:00", None],
+                       [23, "23:00-00:00", None]]
 
         currTimePeriodPosition = 0
 
@@ -730,6 +755,7 @@ class tblLabel_TH:
         totalPeds = 0
         highestValueRow = 0
         highestPedValue = 0
+        firstPass = True
 
         # https://medspx.fr/blog/Qgis/better_qgis_forms_part_three/
         QgsMessageLog.logMessage("In fetchSurveyDetails: periodIndex1: " + str(currTimePeriodPosition),
@@ -746,6 +772,12 @@ class tblLabel_TH:
 
             QgsMessageLog.logMessage("In fetchSurveyDetails: " + str(timePeriodStart) + " : " + str(value),
                                      tag="TOMs panel")
+
+            if firstPass == True:
+                if timePeriodStart > currTimePeriod:
+                    currTimePeriod = timePeriodStart
+                    currTimePeriodPosition = timePeriodStart
+                    firstPass = False
 
             if timePeriodStart == currTimePeriod:
                 totalPeds = totalPeds + value
@@ -769,9 +801,12 @@ class tblLabel_TH:
 
                 if currTimePeriodPosition < len(timePeriods) - 1:
 
-                    currTimePeriodPosition = currTimePeriodPosition + 1
-                    currTimePeriod = timePeriodStart
-                    totalPeds = value
+                    if currTimePeriod + 1 == timePeriodStart:
+                        currTimePeriodPosition = currTimePeriodPosition + 1
+                        currTimePeriod = timePeriodStart
+                        totalPeds = value
+                    else:
+                        break
 
                 else:
                     break
