@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/tblLabel_TH" >
+    <qresource prefix="/plugins/FlowReporting" >
         <file>icon.png</file>
         <file>icons/LetterA.svg</file>
         <file>icons/LetterA.png</file>

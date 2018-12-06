@@ -31,5 +31,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from .tblLabel_TH import tblLabel_TH
-    return tblLabel_TH(iface)
+    from .tblLabel_TH import FlowReporting
+    return FlowReporting(iface)

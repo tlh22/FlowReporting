@@ -1,0 +1,7 @@
+.idea/FlowReporting.iml
+.idea/misc.xml
+*.xml
+*.pyc
+resources.pyc
+tblLabel_TH.pyc
+*.pyc

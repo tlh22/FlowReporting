@@ -42,7 +42,7 @@ class signalTest(QObject):
     pointClicked = pyqtSignal(QgsPoint, QgsFeature)
     """Signal will be emitted, when click is made"""
 
-class tblLabel_TH:
+class FlowReporting:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -63,7 +63,7 @@ class tblLabel_TH:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'tblLabel_TH_{}.qm'.format(locale))
+            'FlowReporting_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -75,10 +75,10 @@ class tblLabel_TH:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&tblLabel_TH')
+        #self.menu = self.tr(u'&tblLabel_TH')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'tblLabel_TH')
-        self.toolbar.setObjectName(u'tblLabel_TH')
+        self.toolbar = self.iface.addToolBar(u'FlowReporting')
+        self.toolbar.setObjectName(u'FlowReporting')
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -93,7 +93,7 @@ class tblLabel_TH:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('tblLabel_TH', message)
+        return QCoreApplication.translate('FlowReporting', message)
 
 
     def add_action(
@@ -163,10 +163,10 @@ class tblLabel_TH:
         if add_to_toolbar:
             self.toolbar.addAction(action)
 
-        if add_to_menu:
+        """if add_to_menu:
             self.iface.addPluginToMenu(
                 self.menu,
-                action)
+                action)"""
 
         self.actions.append(action)
 
@@ -177,7 +177,7 @@ class tblLabel_TH:
 
         #registerFunctions()  # Register the Expression functions that we need
         self.AnnotationsToolbar = self.iface.addToolBar("Annotations Toolbar")
-        self.actionAnnotations = QAction(QIcon(":/plugins/tblLabel_TH/icons/LetterA.png"),
+        self.actionAnnotations = QAction(QIcon(":/plugins/FlowReporting/icons/LetterA.png"),
                                             QCoreApplication.translate("MyPlugin", "Start Annotations"),
                                             self.iface.mainWindow())
         self.actionAnnotations.setCheckable(True)
@@ -186,12 +186,12 @@ class tblLabel_TH:
 
         self.actionAnnotations.triggered.connect(self.onStartAnnotations)
 
-        icon_path = ':/plugins/tblLabel_TH/icon.png'
+        """icon_path = ':/plugins/FlowReporting/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'tblLabel'),
+            text=self.tr(u'FlowReporting'),
             callback=self.run,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow())"""
 
     def onStartAnnotations(self):
         """Filter main layer based on date and state options"""
@@ -332,7 +332,7 @@ class tblLabel_TH:
         newAnnotation.setHTMLPage(fileName)
 
 
-        newAnnotation.setFrameSize(QSizeF(130, 280))
+        newAnnotation.setFrameSize(QSizeF(170, 350))
         newAnnotation.minimumFrameSize
         newAnnotation.setFrameBorderWidth(2.0)
         newAnnotation.setFrameColor(self.featureColour)
@@ -411,7 +411,7 @@ class tblLabel_TH:
             colour = cat.symbol().color()
             QgsMessageLog.logMessage("In getFeatureColour. " + str(cat.value()) + ":" + str(cat.label()) + ":" + str(cat.symbol()) + ";" + str(colour.name()),
                                      tag="TOMs panel")
-            if str(self.siteNr) == str(cat.value()):
+            if str(self.siteNr)+'_PCL' == str(cat.value()):
                 return colour
             #print "%s: %s :: %s" % (cat.value().toString(), cat.label(), str(cat.symbol()))
 
@@ -457,7 +457,7 @@ class tblLabel_TH:
 
     def buildHTMLFile(self, feature):
 
-        self.getTitleDetails(feature, "Nr Peds")
+        self.getTitleDetails(feature, "Nr PCLs")
 
         self.featureColour = self.getFeatureColour(self.geomLayer, feature)
 
@@ -519,7 +519,7 @@ class tblLabel_TH:
         flowFieldName = "FlowNr"
         areaFieldName = "Area"
         dayFieldName = "Date"
-        dataFieldName = "NrPeds"
+        dataFieldName = "NrPCLs"
         startTimeFieldName = "StartTime"
 
         # get the different days for the flow.
@@ -761,7 +761,7 @@ class tblLabel_TH:
         QgsMessageLog.logMessage("In fetchSurveyDetails: periodIndex1: " + str(currTimePeriodPosition),
                                  tag="TOMs panel")
 
-        for feature in sorted(features, key=lambda f: f[6]):   # 6 = StartTime
+        for feature in sorted(features, key=lambda f: f[7]):   # 6 = StartTime
             attr = feature.attributes()
             hours, minutes = map(int, attr[idxStartTime].split(':'))
             timePeriodStart = hours
@@ -769,15 +769,18 @@ class tblLabel_TH:
             #timePeriodStart = datetime.strptime(attr[idxStartTime], '%H:%M')
             #timePeriodStart = QTime.fromString(attr[idxStartTime], 'HH:MM').hour()
             value = attr[idxDataColumn]
-
+            QgsMessageLog.logMessage("In fetchSurveyDetails attr: " + str(attr),
+                                     tag="TOMs panel")
             QgsMessageLog.logMessage("In fetchSurveyDetails: " + str(timePeriodStart) + " : " + str(value),
                                      tag="TOMs panel")
 
             if firstPass == True:
+                firstPass = False
                 if timePeriodStart > currTimePeriod:
                     currTimePeriod = timePeriodStart
                     currTimePeriodPosition = timePeriodStart
-                    firstPass = False
+                    QgsMessageLog.logMessage("In fetchSurveyDetails. Curr time period set to " + str(currTimePeriod),
+                                             tag="TOMs panel")
 
             if timePeriodStart == currTimePeriod:
                 totalPeds = totalPeds + value
@@ -787,7 +790,7 @@ class tblLabel_TH:
                 QgsMessageLog.logMessage("In fetchSurveyDetails: periodIndex2: " + str(currTimePeriodPosition),
                                          tag="TOMs panel")
                 QgsMessageLog.logMessage(
-                    "In fetchSurveyDetails: " + str(
+                    "In fetchSurveyDetails - writing: " + str(
                         timePeriods[currTimePeriodPosition][self.timePeriodIndex]) + " : " + str(
                         totalPeds), tag="TOMs panel")
 
@@ -801,7 +804,7 @@ class tblLabel_TH:
 
                 if currTimePeriodPosition < len(timePeriods) - 1:
 
-                    if currTimePeriod + 1 == timePeriodStart:
+                    if (currTimePeriod + 1) == timePeriodStart:
                         currTimePeriodPosition = currTimePeriodPosition + 1
                         currTimePeriod = timePeriodStart
                         totalPeds = value
